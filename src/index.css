@@ -1,0 +1,70 @@
+:root {
+  --gutter: 1em;
+  --scrollbar-size: 0.35em;
+  --scrollbar-color: transparent;
+  --handle-color: #343434;
+  --handle-border-radius: 0.25em;
+  --handle-opacity: 0.65;
+}
+
+html,
+body {
+  line-height: 2;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 1em;
+}
+
+.scroll {
+  height: 500px;
+  max-width: 64em; 
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.go {
+  position: relative;
+  overflow: hidden !important;
+}
+
+.go__content,
+.go__wrapper {
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+
+.go__wrapper {
+  height: 100%;
+  overflow-y: scroll;
+}
+
+.go__content {
+  padding: var(--gutter);
+}
+
+.go__scrollbar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: var(--scrollbar-width);
+  height: 100%;
+  background-color: var(--scrollbar-color);
+}
+
+.go__scrollbar-handle {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+  border-radius: var(--handle-border-radius);
+  background-color: var(--handle-color);
+  opacity: var(--handle-opacity);
+  transition: opacity 275ms ease-out;
+}
+
+.go__scrollbar-handle:hover,
+.go__scrollbar-handle:active,
+.go__scrollbar-handle:focus {
+  opacity: 1;
+  cursor: pointer;
+}
