@@ -23,6 +23,7 @@ export default class ScrollBar {
     this.content = null;
     this.scrollbar = null;
     this.handle = null;
+    this.mouseDown = false;
     this.init();
   }
 
@@ -52,16 +53,50 @@ export default class ScrollBar {
   }
 
   addEventListeners = () => {
-    this.wrapper.addEventListener('scroll', this.onScrollY.bind(this), false);
-    window.addEventListener('resize', this.onResize.bind(this), false);
+    window.addEventListener('resize', this.onResize, false);
+    document.addEventListener('mousemove', this.onMouseMove, false);
+    document.addEventListener('mouseup', this.onMouseUp, false);
+    this.wrapper.addEventListener('scroll', this.onScrollY, false);
+    this.handle.addEventListener('mousedown', this.onMouseDown, false);
   }
 
-  onScrollY = (e) => this.update();
+  onScrollY = (e) => {
+    this.update();
+  }
 
-  onResize = (e) => this.update();
+  onResize = (e) => {
+    this.update();
+  }
+
+  onMouseDown = (e) => {
+    this.mouseDown = true;
+  }
+
+  onMouseUp = (e) => {
+    this.mouseDown = false;
+  }
+
+  onMouseMove = (e) => {
+    if (!this.mouseDown) {
+      return;
+    }
+
+    this.scrolled = this.scrolled + (e.movementY / this.content.offsetHeight);
+
+    if (this.scrolled < 0) {
+      this.scrolled = 0;
+    }
+
+    if (this.scrolled > this.totalScroll) {
+      this.scrolled = this.totalScroll;
+    }
+    
+    this.handle.style.marginTop = this.scrolled * this.content.clientHeight + 'px';
+    this.wrapper.scrollTop = this.scrolled * this.content.clientHeight;
+  }
 
   hideNativeScrollBar = () => {
-    this.wrapper.style.width = `${this.element.clientWidth + 60}px`;
+    this.wrapper.style.width = `${this.element.clientWidth + 50}px`;
     this.content.style.width = this.element.clientWidth + 'px';
   };
 
@@ -78,14 +113,14 @@ export default class ScrollBar {
     this.hideNativeScrollBar();
     this.hideScrollBar();
 
+    this.scrolled = this.wrapper.scrollTop / this.wrapper.scrollHeight;
+    this.totalScroll = (this.wrapper.scrollHeight - this.wrapper.clientHeight) / this.wrapper.scrollHeight;
+
     // dynamic scroll handle height
     this.handle.style.height = this.wrapper.clientHeight * (this.wrapper.clientHeight / this.content.clientHeight) + 'px';
-
+    
     // updating scroll bar position and ratio
-    this.totalScrollable = this.content.clientHeight - this.wrapper.clientHeight;
-    this.totalHandle = this.scrollbar.clientHeight - this.handle.clientHeight;
-    this.ratio = this.totalHandle / this.totalScrollable;
-    this.handle.style.marginTop = this.ratio * this.wrapper.scrollTop + 'px';
+    this.handle.style.marginTop = this.scrolled * this.wrapper.clientHeight + 'px';
   }
 
   init = () => {

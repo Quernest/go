@@ -1,7 +1,8 @@
 :root {
   --gutter: 1em;
-  --scrollbar-size: 0.35em;
-  --scrollbar-color: transparent;
+  --scrollbar-size: 0.5em;
+  --scrollbar-color: #eee;
+  --scrollbar-border-radius: 0.25em;
   --handle-color: #343434;
   --handle-border-radius: 0.25em;
   --handle-opacity: 0.65;
@@ -51,6 +52,7 @@ body {
   width: var(--scrollbar-width);
   height: 100%;
   background-color: var(--scrollbar-color);
+  border-radius: var(--scrollbar-border-radius);
 }
 
 .go__scrollbar-handle {
@@ -60,6 +62,12 @@ body {
   background-color: var(--handle-color);
   opacity: var(--handle-opacity);
   transition: opacity 275ms ease-out;
+}
+
+.go__scrollbar:hover,
+.go__scrollbar:active,
+.go__scrollbar:focus {
+  cursor: pointer;
 }
 
 .go__scrollbar-handle:hover,
