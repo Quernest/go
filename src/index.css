@@ -28,19 +28,19 @@ body {
   overflow: hidden !important;
 }
 
-.go__content,
-.go__wrapper {
+.go__scrollbox,
+.go__scrollbox-content {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
 }
 
-.go__wrapper {
-  height: 100%;
+.go__scrollbox {
   overflow-y: scroll;
+  height: 100%;
 }
 
-.go__content {
+.go__scrollbox-content {
   padding: var(--gutter);
 }
 
@@ -53,6 +53,14 @@ body {
   height: 100%;
   background-color: var(--scrollbar-color);
   border-radius: var(--scrollbar-border-radius);
+}
+
+.go__scrollbar-visible {
+  display: block;
+}
+
+.go__scrollbar-hidden {
+  display: none;
 }
 
 .go__scrollbar-handle {
@@ -75,4 +83,11 @@ body {
 .go__scrollbar-handle:focus {
   opacity: 1;
   cursor: pointer;
+}
+
+.unselectable {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }

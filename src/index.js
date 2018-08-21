@@ -1,11 +1,9 @@
 import './index.css';
+import { getOffsetY } from './helpers';
 
 export default class ScrollBar {
   static get defaultOptions() {
-    return {
-      autoHide: false,
-      easing: false,
-    };
+    return {}
   }
 
   constructor(element = null, options = {}) {
@@ -19,118 +17,133 @@ export default class ScrollBar {
 
     this.options = Object.assign({}, options, ScrollBar.defaultOptions);
     this.element = element;
-    this.wrapper = null;
+    this.element.classList.add('go');
     this.content = null;
     this.scrollbar = null;
+    this.scrollbox = null;
     this.handle = null;
-    this.mouseDown = false;
     this.init();
   }
 
   addScrollBar = () => {
     this.handle = document.createElement('div');
-    this.scrollbar = document.createElement('div');
-
-    this.scrollbar.classList.add('go__scrollbar');
     this.handle.classList.add('go__scrollbar-handle');
+    this.scrollbar = document.createElement('div');
+    this.scrollbar.classList.add('go__scrollbar');
 
     this.scrollbar.appendChild(this.handle);
     this.element.appendChild(this.scrollbar);
   }
 
-  addWrapper = () => {
-    this.wrapper = document.createElement('div');
+  addScrollBox = () => {
+    this.scrollbox = document.createElement('div');
+    this.scrollbox.classList.add('go__scrollbox');
     this.content = document.createElement('div');
-    this.wrapper.classList.add('go__wrapper');
-    this.content.classList.add('go__content');
-  
-    ;[...this.element.childNodes].forEach(child => this.content.appendChild(child));
-  
-    this.wrapper.appendChild(this.content);
-    this.element.appendChild(this.wrapper);
+    this.content.classList.add('go__scrollbox-content');
 
-    return this.wrapper;
+    ;[...this.element.childNodes].forEach(child => this.content.appendChild(child));
+    
+    this.scrollbox.appendChild(this.content);
+    this.element.appendChild(this.scrollbox);
+  }
+
+  hideBrowserScrollBar = () => {
+    const browserScrollBarSize = 20;
+
+    this.scrollbox.style.width = `${this.element.clientWidth + browserScrollBarSize}px`;
+    this.content.style.width = `${this.element.clientWidth}px`;
+  }
+
+  update = () => {
+    this.calculateScrollRatio();
+
+    // if content is smaller than the container
+    if (this.scrollbox.clientHeight > this.content.clientHeight){
+      this.scrollbar.classList.remove('go__scrollbar-visible');
+      this.scrollbar.classList.add('go__scrollbar-hidden');
+    } else {
+      this.scrollbar.classList.remove('go__scrollbar-hidden');
+      this.scrollbar.classList.add('go__scrollbar-visible');
+    }
+    
+    // dynamic scroll handle height
+    this.handle.style.height = this.element.clientHeight * (this.element.clientHeight / this.content.clientHeight) + 'px';
   }
 
   addEventListeners = () => {
     window.addEventListener('resize', this.onResize, false);
-    document.addEventListener('mousemove', this.onMouseMove, false);
-    document.addEventListener('mouseup', this.onMouseUp, false);
-    this.wrapper.addEventListener('scroll', this.onScrollY, false);
-    this.handle.addEventListener('mousedown', this.onMouseDown, false);
+
+    document.addEventListener('mouseup', this.onHandleMouseUp, false);
+    document.addEventListener('mousemove', this.onHandleMouseMove, false);
+    this.scrollbox.addEventListener('scroll', this.onScroll, { passive: false });
+    this.scrollbar.addEventListener('click', this.onScrollBarClick, false);
+    this.handle.addEventListener('click', this.onHandleClick, false);
+    this.handle.addEventListener('mousedown', this.onHandleMouseDown, false);
   }
 
-  onScrollY = (e) => {
-    this.update();
+  calculateScrollRatio = () => {
+    this.totalScrollable = this.content.clientHeight - this.scrollbox.clientHeight;
+    this.totalHandle = this.scrollbar.clientHeight - this.handle.clientHeight;
+    this.ratio = this.totalHandle / this.totalScrollable;
+  }
+
+  onScroll = (e) => {
+    this.calculateScrollRatio();
+    this.handle.style.marginTop = `${this.ratio * this.scrollbox.scrollTop}px`;
   }
 
   onResize = (e) => {
+    this.hideBrowserScrollBar();
     this.update();
   }
 
-  onMouseDown = (e) => {
+  onHandleClick = (e) => {
+    e.stopPropagation();
+
+    console.log('clicked on handle');
+  }
+
+  onHandleMouseDown = (e) => {
+    e.stopPropagation();
+
+    this.content.classList.add('unselectable');
+    this.handle.clientY = e.clientY;
+    this.handle.scrollTop = this.scrollbox.scrollTop;
     this.mouseDown = true;
   }
 
-  onMouseUp = (e) => {
+  onHandleMouseUp = (e) => {
+    e.stopPropagation();
+
+    this.content.classList.remove('unselectable');
     this.mouseDown = false;
   }
 
-  onMouseMove = (e) => {
+  onHandleMouseMove = (e) => {
+    e.stopPropagation();
+
     if (!this.mouseDown) {
       return;
     }
 
-    this.scrolled = this.scrolled + (e.movementY / this.content.offsetHeight);
-
-    if (this.scrolled < 0) {
-      this.scrolled = 0;
-    }
-
-    if (this.scrolled > this.totalScroll) {
-      this.scrolled = this.totalScroll;
-    }
-    
-    this.handle.style.marginTop = this.scrolled * this.content.clientHeight + 'px';
-    this.wrapper.scrollTop = this.scrolled * this.content.clientHeight;
+    this.scrollbox.scrollTop = (((e.clientY - (this.handle.clientHeight / 2)) - this.element.scrollTop) / this.ratio) + this.element.scrollTop;
   }
 
-  hideNativeScrollBar = () => {
-    this.wrapper.style.width = `${this.element.clientWidth + 50}px`;
-    this.content.style.width = this.element.clientWidth + 'px';
-  };
+  onScrollBarClick = (e) => {
+    e.stopPropagation();
 
-  hideScrollBar = () => {
-    // if content is smaller than the container
-    if (this.wrapper.clientHeight > this.content.clientHeight){
-      this.scrollbar.style.display = 'none';
-    } else {
-      this.scrollbar.style.display = 'block';
-    }
-  }
+    let layerY = getOffsetY(e) - this.handle.clientHeight / 2;
 
-  update = () => {
-    this.hideNativeScrollBar();
-    this.hideScrollBar();
-
-    this.scrolled = this.wrapper.scrollTop / this.wrapper.scrollHeight;
-    this.totalScroll = (this.wrapper.scrollHeight - this.wrapper.clientHeight) / this.wrapper.scrollHeight;
-
-    // dynamic scroll handle height
-    this.handle.style.height = this.wrapper.clientHeight * (this.wrapper.clientHeight / this.content.clientHeight) + 'px';
-    
-    // updating scroll bar position and ratio
-    this.handle.style.marginTop = this.scrolled * this.wrapper.clientHeight + 'px';
+    this.scrollbox.scrollTop = layerY / this.totalHandle * this.totalScrollable;
   }
 
   init = () => {
-    this.element.classList.add('go');
-
-    this.addWrapper();
+    this.addScrollBox();
+    this.hideBrowserScrollBar();
     this.addScrollBar();
     this.update();
     this.addEventListeners();
-  };
+  }
 };
 
-const sb = new ScrollBar('.scroll');
+new ScrollBar('.scroll');
