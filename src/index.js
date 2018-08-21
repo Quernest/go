@@ -5,6 +5,8 @@ import { getOffsetY } from './helpers';
  * TODO: 
  * 
  * 1) create mutation observer or image preloader
+ * 2) multiple scrollbars on one page
+ * 3) hide scrollbar if not using
  * 
  */
 
