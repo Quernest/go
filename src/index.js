@@ -1,6 +1,13 @@
 import './index.css';
 import { getOffsetY } from './helpers';
 
+/**
+ * TODO: 
+ * 
+ * 1) create mutation observer or image preloader
+ * 
+ */
+
 export default class ScrollBar {
   static get defaultOptions() {
     return {
@@ -66,7 +73,7 @@ export default class ScrollBar {
       this.scrollbar.classList.remove('go__scrollbar-hidden');
       this.scrollbar.classList.add('go__scrollbar-visible');
     }
-    
+
     // dynamic scroll handle height
     this.handle.style.height = `${this.element.clientHeight * (this.element.clientHeight / this.content.clientHeight)}px`;
   }
