@@ -3,7 +3,9 @@ import { getOffsetY } from './helpers';
 
 export default class ScrollBar {
   static get defaultOptions() {
-    return {}
+    return {
+      speed: 1,
+    }
   }
 
   constructor(element = null, options = {}) {
@@ -57,7 +59,6 @@ export default class ScrollBar {
   update = () => {
     this.calculateScrollRatio();
 
-    // if content is smaller than the container
     if (this.scrollbox.clientHeight > this.content.clientHeight){
       this.scrollbar.classList.remove('go__scrollbar-visible');
       this.scrollbar.classList.add('go__scrollbar-hidden');
@@ -67,12 +68,11 @@ export default class ScrollBar {
     }
     
     // dynamic scroll handle height
-    this.handle.style.height = this.element.clientHeight * (this.element.clientHeight / this.content.clientHeight) + 'px';
+    this.handle.style.height = `${this.element.clientHeight * (this.element.clientHeight / this.content.clientHeight)}px`;
   }
 
   addEventListeners = () => {
     window.addEventListener('resize', this.onResize, false);
-
     document.addEventListener('mouseup', this.onHandleMouseUp, false);
     document.addEventListener('mousemove', this.onHandleMouseMove, false);
     this.scrollbox.addEventListener('scroll', this.onScroll, { passive: false });
@@ -99,8 +99,6 @@ export default class ScrollBar {
 
   onHandleClick = (e) => {
     e.stopPropagation();
-
-    console.log('clicked on handle');
   }
 
   onHandleMouseDown = (e) => {
@@ -113,15 +111,11 @@ export default class ScrollBar {
   }
 
   onHandleMouseUp = (e) => {
-    e.stopPropagation();
-
     this.content.classList.remove('unselectable');
     this.mouseDown = false;
   }
 
   onHandleMouseMove = (e) => {
-    e.stopPropagation();
-
     if (!this.mouseDown) {
       return;
     }
